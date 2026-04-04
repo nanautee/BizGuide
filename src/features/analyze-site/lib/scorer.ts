@@ -1,5 +1,5 @@
 import { SEO_CONSTANTS } from "@/shared/config/constants";
-import type { AnalysisIssue } from "@/entities/site/types";
+import type { AnalysisIssue } from "@/entities/site";
 
 export function calculateScore(issues: AnalysisIssue[]): number {
   const totalPenalty = issues.reduce((sum, item) => sum + item.penalty, 0);

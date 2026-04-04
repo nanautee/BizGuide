@@ -9,20 +9,25 @@ const URL_STORAGE_KEY = 'bizguide-known-urls';
 
 const styles = {
   // Секция Hero: отдельный слой фона + слой контента.
-  container: "relative w-full min-h-screen px-4",
-  content: "relative z-10 w-full min-h-screen flex flex-col items-center justify-start pt-24 md:pt-28",
-  title: "text-white text-4xl md:text-5xl lg:text-6xl font-bold text-center max-w-3xl mx-auto px-4",
-  subtitle: "text-white/90 text-base md:text-lg text-center mt-4 max-w-xl mx-auto px-4",
-  inputWrapper: "flex justify-center mt-10 w-full px-4",
-  inputGroup: "relative w-full max-w-[775px]",
-  button: "absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50",
-  buttonImg: "w-10 h-10",
-  startButtonWrap: "relative mt-3 flex flex-col items-center",
-  startButton: "relative z-10 rounded-full bg-[#4E95EC] px-8 py-2 text-white/95 text-xl leading-none hover:opacity-90 transition active:scale-95",
+  container: "relative w-full min-h-screen overflow-hidden px-4",
+  topBlur:
+    "pointer-events-none absolute left-1/2 top-0 z-[1] h-[500px] w-[900px] -translate-x-1/2 -translate-y-[60%] opacity-90",
+  content:
+    "relative z-10 mx-auto flex min-h-screen w-full max-w-[1280px] flex-col items-center justify-start pt-28 sm:pt-32 md:pt-36 lg:pt-90",
+  title:
+    "mx-auto max-w-[980px] px-2 text-center text-[46px] font-bold leading-[0.92] text-white sm:text-[58px] md:text-[72px] lg:text-[80px]",
+  inputWrapper: "mt-8 flex w-full justify-center px-6 md:mt-10",
+  inputGroup: "relative w-full max-w-[760px]",
+  button:
+    "absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center transition-transform active:scale-95 disabled:opacity-50 md:right-3 md:h-12 md:w-12",
+  buttonImg: "h-11 w-11 md:h-12 md:w-12",
+  startButtonWrap: "relative mt-4 flex w-full flex-col items-center md:mt-5",
+  startButton:
+    "relative z-10 rounded-full border border-white/20 bg-[#4C97F6] px-8 py-2 text-base font-normal leading-none text-[#FFFFFF] transition hover:opacity-95 active:scale-95 md:px-10 md:text-xl",
   // Большой фоновый слой песочных часов: на всю ширину и почти на высоту экрана.
   auraWrap:
-    "pointer-events-none absolute left-1/2 -translate-x-1/2 top-[34%] h-[82vh] w-screen z-0",
-  aura: "w-full h-full object-contain object-center opacity-90 mix-blend-screen",
+    "pointer-events-none absolute left-1/2 top-[60%] z-0 h-[112vh] w-[1900px] -translate-x-1/2 -translate-y-1/2 sm:w-[2100px] md:top-[58%] md:w-[2300px] lg:w-[2500px]",
+  aura: "h-full w-full object-contain object-center opacity-95 mix-blend-screen",
   error: "mt-3 text-red-100 text-sm text-center",
   // Попап для нового URL (вход/регистрация перед первым анализом).
   firstVisitOverlay: "fixed inset-0 z-50 bg-black/35 backdrop-blur-[2px] flex items-center justify-center px-4",
@@ -34,7 +39,7 @@ const styles = {
   firstVisitText: "mt-12 text-4xl md:text-5xl font-bold leading-tight max-w-xl",
   firstVisitActions: "mt-8 flex flex-wrap gap-3",
   firstVisitButton:
-    "rounded-full px-8 py-3 text-3xl md:text-4xl bg-white/20 border border-white/30 hover:bg-white/30 transition",
+    "rounded-full border border-white/30 bg-white/20 px-8 py-3 text-2xl font-normal md:text-3xl hover:bg-white/30 transition",
   // Маскот в попапе авторизации.
   mascot: "pointer-events-none absolute right-4 md:right-8 bottom-0 w-[220px] md:w-[320px] opacity-95",
   // Стили попапа для сценария "бизнес только запускается".
@@ -43,11 +48,9 @@ const styles = {
   modalTitle: "text-2xl md:text-3xl font-bold",
   modalSubtitle: "mt-2 text-white/90",
   formRow: "mt-5 flex flex-col md:flex-row gap-3",
-  select:
-    "h-11 rounded-xl border border-white/40 bg-white/15 px-4 outline-none focus:border-white/70",
+  select:"h-11 rounded-xl border border-white/40 bg-white/15 px-4 outline-none focus:border-white/70",
   modalActions: "mt-5 flex gap-3",
-  modalButtonPrimary:
-    "rounded-xl bg-[#4E95EC] px-5 py-2 font-medium hover:opacity-90 disabled:opacity-50",
+  modalButtonPrimary:"rounded-xl bg-[#4C97F6] px-5 py-2 font-normal hover:opacity-90 disabled:opacity-50",
   modalButtonGhost: "rounded-xl border border-white/40 px-5 py-2 hover:bg-white/10",
   resultBox: "mt-5 rounded-2xl bg-white/10 p-4 border border-white/30",
   resultTitle: "font-semibold text-lg",
@@ -142,6 +145,8 @@ export const HeroSection = () => {
 
   return (
     <div className={styles.container}>
+      <img src="/blurelips.svg" alt="" aria-hidden className={styles.topBlur} />
+
       {/* Декоративный фон Hero (ниже основного контента) */}
       <div className={styles.auraWrap} aria-hidden>
         <img src="/aura.svg" alt="" className={styles.aura} />
@@ -149,9 +154,11 @@ export const HeroSection = () => {
 
       {/* Контент Hero: заголовок, URL-форма, CTA */}
       <div className={styles.content}>
-        <h1 className={styles.title}>Анализ вашего бизнеса в интернете</h1>
-        <p className={styles.subtitle}>проверим, как клиенты находят вас сейчас</p>
-        <div className={styles.inputWrapper}>
+        <h1 className={styles.title}>
+          <span className="block">Анализ вашего бизнеса</span>
+          <span className="block">в интернете</span>
+        </h1>
+        <div id="audit" className={styles.inputWrapper}>
           <div className={styles.inputGroup}>
             <GlassInput
               type="text"
@@ -160,7 +167,6 @@ export const HeroSection = () => {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
               disabled={loading}
-              className="text-center placeholder:text-center"
             />
             <button
               className={styles.button}

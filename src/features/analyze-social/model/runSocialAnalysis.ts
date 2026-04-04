@@ -1,5 +1,5 @@
-import { parseSocialLink } from "@/shared/lib/social/socialParser";
-import type { SocialLinkAnalysis, SocialLinkInput } from "@/entities/social/types";
+import { parseSocialLink } from "../lib/socialParser";
+import type { SocialLinkAnalysis, SocialLinkInput } from "@/entities/social";
 
 export async function runSocialAnalysis(links: SocialLinkInput[]): Promise<{
   score: number;

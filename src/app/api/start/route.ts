@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { runStartAnalysis } from "@/features/start-business/model/runStartAnalysis";
+import { runStartAnalysis } from "@/features/start-business";
 import { attachSessionCookie, getOrCreateSessionId } from "@/shared/lib/session/sessionCookie";
 import { getSessionCache, setSessionCache } from "@/shared/lib/store/sessionCacheStore";
 
@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     if (!cached) {
       setSessionCache(sessionId, "start-analysis", cacheKey, result);
     }
+    setSessionCache(sessionId, "start-analysis-latest", "latest", result);
 
     const response = NextResponse.json(result);
     if (isNew) {

@@ -8,8 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: Helvetica, Arial, sans-serif;
+  --font-mono: monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,15 +19,32 @@
   }
 }
 
+html,
 body {
   margin: 0;
   padding: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: Helvetica, Arial, sans-serif !important;
+}
+
+*,
+*::before,
+*::after {
+  font-family: Helvetica, Arial, sans-serif !important;
 }

@@ -1,9 +1,9 @@
 import { fetchHtml } from "@/shared/lib/http/fetchHtml";
-import { parseSite } from "@/entities/site/model/parseSite";
-import { runSiteRules, buildRecommendations } from "@/shared/lib/analyzer/rules";
-import { calculateScore } from "@/shared/lib/analyzer/scorer";
+import { parseSite } from "@/entities/site";
+import { runSiteRules, buildRecommendations } from "../lib/rules";
+import { calculateScore } from "../lib/scorer";
 import { getPreviousSnapshot, saveSnapshot } from "@/shared/lib/store/analysisStore";
-import type { SiteAnalysisResult } from "@/entities/site/types";
+import type { SiteAnalysisResult } from "@/entities/site";
 
 function toSiteId(url: string): string {
   return Buffer.from(url).toString("base64url");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { runSocialAnalysis } from "@/features/analyze-social/model/runSocialAnalysis";
+import { runSocialAnalysis } from "@/features/analyze-social";
 import { attachSessionCookie, getOrCreateSessionId } from "@/shared/lib/session/sessionCookie";
 import { getSessionCache, setSessionCache } from "@/shared/lib/store/sessionCacheStore";
 
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     if (!cached) {
       setSessionCache(sessionId, "social-analysis", cacheKey, result);
     }
+    setSessionCache(sessionId, "social-analysis-by-site", siteId, result);
 
     const response = NextResponse.json(result);
     if (isNew) {

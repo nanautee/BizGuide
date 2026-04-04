@@ -10,7 +10,7 @@ const styles = {
   buttonWrapper: "relative inline-block mt-12 z-10",
   // Основной CTA.
   button:
-    "inline-block px-10 py-3 text-white text-2xl md:text-3xl font-medium rounded-[58px] bg-gradient-to-br from-[#4C97F6] to-[#7FB5F6] hover:opacity-90 transition shadow-lg",
+    "inline-block rounded-[58px] bg-[#4C97F6] px-10 py-3 text-2xl font-normal text-white md:text-3xl hover:opacity-90 transition shadow-lg",
   // Белый подсвет под кнопкой.
   glow: "pointer-events-none absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[380px] md:w-[520px] max-w-none h-auto opacity-90 z-0 object-contain",
 };

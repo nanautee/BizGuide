@@ -1,6 +1,6 @@
 import axios from "axios";
 import { REQUEST_CONSTANTS, SEO_CONSTANTS } from "@/shared/config/constants";
-import type { SocialLinkAnalysis, SocialLinkInput } from "@/entities/social/types";
+import type { SocialLinkAnalysis, SocialLinkInput } from "@/entities/social";
 
 export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLinkAnalysis> {
   if (!input.active) {

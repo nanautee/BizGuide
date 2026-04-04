@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { SEO_CONSTANTS } from "@/shared/config/constants";
-import type { ParsedSiteData } from "@/entities/site/types";
+import type { ParsedSiteData } from "../types";
 
 export function parseSite(html: string, baseUrl: string): ParsedSiteData {
   const $ = cheerio.load(html);

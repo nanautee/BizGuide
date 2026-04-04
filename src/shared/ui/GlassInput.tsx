@@ -2,7 +2,8 @@ import { InputHTMLAttributes } from 'react';
 
 const styles = {
   // Базовый стеклянный input для форм главной страницы.
-  input: "w-full h-[65px] bg-[#6DBBFF]/65 backdrop-blur-sm rounded-full pl-6 pr-32 text-white placeholder-white/70 outline-none border border-white/30 focus:border-white/60 transition disabled:opacity-50",
+  input:
+    "w-full h-[56px] md:h-[60px] rounded-full border border-white/25 bg-[#63B0FB]/55 pl-6 pr-28 text-base text-white outline-none transition placeholder:text-base placeholder:text-white/70 focus:border-white/55 disabled:opacity-50 md:text-lg md:placeholder:text-lg",
 };
 
 export const GlassInput = ({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) => {

@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/widgets/header";
-import { Footer } from "@/widgets/footer";
-
-const inter = Inter({ subsets: ["latin"] });
+import { HeaderNav } from "@/widgets/HeaderNav";
+import { FooterBar } from "@/widgets/FooterBar";
 
 export const metadata: Metadata = {
-  title: "Digital Advisor – Цифровой советник для бизнеса",
-  description: "Анализируйте свой сайт и соцсети, получайте понятные рекомендации для роста.",
+  title: "BizGuide – Цифровой советник для бизнеса",
+  description: "WW TEAM :P",
 };
 
 export default function RootLayout({
@@ -18,10 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <Header />
+      <body className="flex min-h-screen flex-col">
+        <HeaderNav />
         <main className="flex-grow">{children}</main>
-        <Footer />
+        <FooterBar />
       </body>
     </html>
   );
