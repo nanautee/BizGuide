@@ -5,7 +5,7 @@ import { attachSessionCookie, getOrCreateSessionId } from "@/shared/lib/session/
 import { getSessionCache, setSessionCache } from "@/shared/lib/store/sessionCacheStore";
 
 const socialLinkSchema = z.object({
-  platform: z.enum(["instagram", "vk", "telegram", "youtube", "whatsapp"]),
+  platform: z.enum(["vk", "tg", "yandex_zen"]),
   url: z.string().url("Некорректная ссылка"),
   active: z.boolean(),
   followers: z.number().optional(),

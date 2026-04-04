@@ -1,23 +1,31 @@
 interface GlassCardProps {
   title: string;
   description: string;
-  raised?: boolean; // приподнимаем центральную карточку
+  raised?: boolean;
+  className?: string;
 }
 
 const styles = {
-  // Единый стиль карточки преимущества.
-  card: "w-[300px] md:w-[320px] min-h-[300px] md:min-h-[330px] bg-[#3686E9]/30 backdrop-blur-md rounded-[24px] p-5 border border-white/30 shadow-lg transition hover:bg-[#3686E9]/10 flex flex-col",
-  raised: "md:-translate-y-10", // Центральную карточку делаем выше, как в макете.
-  title: "text-white text-2xl md:text-[44px] leading-[0.95] font-bold mb-3",
-  description: "text-white/90 text-base md:text-[28px] leading-[1.08]",
+  card: [
+    "w-full overflow-hidden rounded-[24px] border border-white/30 bg-[#3686E9]/30",
+    "p-5 shadow-lg backdrop-blur-md transition",
+    "flex flex-col",
+    "min-h-[240px] sm:min-h-[280px] md:min-h-[320px]",
+  ].join(" "),
+  raised: "md:-translate-y-5",
+  title: [
+    "mb-3 break-words font-bold leading-[0.92] text-white",
+    "text-2xl sm:text-[24px] md:text-[32px] lg:text-[40px]",
+  ].join(" "),
+  text: [
+    "mt-2 break-words leading-[1.08] text-white/90",
+    "text-sm sm:text-base md:text-[24px]",
+  ].join(" "),
 };
 
-export const GlassCard = ({ title, description, raised = false }: GlassCardProps) => {
-  return (
-    // raised включаем выборочно для построения "лесенки" карточек.
-    <div className={`${styles.card} ${raised ? styles.raised : ''}`}>
-      <h3 className={styles.title}>{title}</h3>
-      <p className={styles.description}>{description}</p>
-    </div>
-  );
-};
+export const GlassCard = ({ title, description, raised = false, className = "" }: GlassCardProps) => (
+  <article className={`${styles.card} ${raised ? styles.raised : ""} ${className}`}>
+    <h3 className={styles.title}>{title}</h3>
+    <p className={styles.text}>{description}</p>
+  </article>
+);

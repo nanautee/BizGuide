@@ -24,7 +24,6 @@ export interface StartBusinessResponse {
   commercialOffer: string[];
 }
 
-// Легкая обертка над fetch для клиентских запросов.
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
@@ -56,11 +55,32 @@ export function startBusiness(niche: string): Promise<StartBusinessResponse> {
 }
 
 export interface SocialLinkPayload {
-  platform: "instagram" | "vk" | "telegram" | "youtube" | "whatsapp";
+  platform: "vk" | "tg" | "yandex_zen";
   url: string;
   active: boolean;
   followers?: number;
   contacts?: string;
+}
+
+export interface VkGroupMetricsDTO {
+  name: string;
+  screenName: string;
+  membersCount: number;
+  description: string;
+  status: string;
+  verified: boolean;
+  hasCover: boolean;
+  hasPhoto: boolean;
+  siteUrl: string | null;
+  contacts: { desc: string; email?: string }[];
+  tabs: { name: string; count: number }[];
+  wallPosts: number;
+  videos: number;
+  photos: number;
+  articles: number;
+  clips: number;
+  isClosed: boolean;
+  type: string;
 }
 
 export interface SocialAnalysisItem {
@@ -70,6 +90,7 @@ export interface SocialAnalysisItem {
   score: number;
   issues: string[];
   recommendation: string;
+  metrics?: VkGroupMetricsDTO;
 }
 
 export interface SocialAnalyzeResponse {

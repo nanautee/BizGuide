@@ -1,6 +1,26 @@
 import axios from "axios";
 import { REQUEST_CONSTANTS, SEO_CONSTANTS } from "@/shared/config/constants";
 import type { SocialLinkAnalysis, SocialLinkInput } from "@/entities/social";
+import { parseVkGroup } from "./vkParser";
+import { parseZenChannel } from "./zenParser";
+
+function isVkUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === "vk.com" || host === "www.vk.com" || host.endsWith(".vk.com");
+  } catch {
+    return false;
+  }
+}
+
+function isZenUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === "dzen.ru" || host === "zen.yandex.ru" || host.endsWith(".dzen.ru");
+  } catch {
+    return false;
+  }
+}
 
 export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLinkAnalysis> {
   if (!input.active) {
@@ -9,9 +29,39 @@ export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLin
       url: input.url,
       status: "warning",
       score: 50,
-      issues: ["Площадка выключена из анализа."],
-      recommendation: "Активируйте площадку, если планируете привлекать клиентов через нее.",
+      issues: ["Эта площадка сейчас выключена."],
+      recommendation: "Включите её, если хотите привлекать клиентов через эту соцсеть.",
     };
+  }
+
+  if (input.platform === "vk" || isVkUrl(input.url)) {
+    try {
+      return await parseVkGroup(input.url);
+    } catch {
+      return {
+        platform: "vk",
+        url: input.url,
+        status: "error",
+        score: 30,
+        issues: ["Не получилось загрузить данные VK-группы."],
+        recommendation: "Проверьте, что ссылка правильная и страница открывается.",
+      };
+    }
+  }
+
+  if (input.platform === "yandex_zen" || isZenUrl(input.url)) {
+    try {
+      return await parseZenChannel(input.url);
+    } catch {
+      return {
+        platform: "yandex_zen",
+        url: input.url,
+        status: "error",
+        score: 30,
+        issues: ["Не получилось загрузить данные канала Дзен."],
+        recommendation: "Проверьте, что ссылка правильная и канал существует.",
+      };
+    }
   }
 
   try {
@@ -23,10 +73,10 @@ export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLin
 
     const content = String(response.data ?? "").toLowerCase();
     const hasContacts = SEO_CONSTANTS.contactKeywords.some((keyword) =>
-      content.includes(keyword.toLowerCase())
+      content.includes(keyword.toLowerCase()),
     );
 
-    const issues = hasContacts ? [] : ["На странице не обнаружены явные контакты."];
+    const issues = hasContacts ? [] : ["На странице не видно контактов (телефон, email и т.д.)."];
     return {
       platform: input.platform,
       url: input.url,
@@ -34,8 +84,8 @@ export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLin
       score: issues.length ? 70 : 90,
       issues,
       recommendation: hasContacts
-        ? "Контакты найдены. Поддерживайте актуальность профиля."
-        : "Добавьте телефон/мессенджер в описание профиля.",
+        ? "Контакты есть. Не забывайте обновлять информацию."
+        : "Добавьте телефон или мессенджер, чтобы клиенты могли с вами связаться.",
     };
   } catch {
     return {
@@ -43,8 +93,8 @@ export async function parseSocialLink(input: SocialLinkInput): Promise<SocialLin
       url: input.url,
       status: "error",
       score: 30,
-      issues: ["Не удалось получить данные страницы (таймаут или ошибка доступа)."],
-      recommendation: "Проверьте ссылку и доступность страницы.",
+      issues: ["Не получилось загрузить страницу."],
+      recommendation: "Проверьте, что ссылка правильная и страница открывается.",
     };
   }
 }

@@ -1,33 +1,151 @@
+"use client";
+
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { analyzeSite } from "@/shared/api/api";
+
+const PENDING_URL_KEY = "bizguide_pending_url";
 
 const styles = {
-  page: "relative flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden px-4 pt-24 pb-8 md:pt-28",
-  auraWrap:
-    "pointer-events-none absolute left-1/2 top-1/2 z-0 h-[120vh] w-[1900px] -translate-x-1/2 -translate-y-1/2 md:w-[2300px]",
-  aura: "h-full w-full object-contain object-center opacity-95 mix-blend-screen",
-  card:
-    "relative z-10 w-full max-w-[600px] rounded-[32px] border border-white/45 bg-[#6AA8EE]/45 px-6 py-7 text-white backdrop-blur-md md:px-8 md:py-8",
-  title: "text-center text-6xl font-bold leading-none md:text-7xl",
-  form: "mt-8",
-  row: "mt-5",
-  field:
-    "w-full border-b border-white/85 bg-transparent pb-2 text-2xl leading-none text-white outline-none placeholder:text-white/80 md:text-3xl",
-  forgot: "mt-1 text-right text-xl text-white/85 md:text-2xl",
-  submit:
-    "mt-7 inline-flex h-[54px] w-full items-center justify-center rounded-full bg-[#4C97F6] text-3xl font-normal text-white transition hover:opacity-90 md:h-[58px] md:text-4xl",
-  footer: "mt-5 text-center text-xl text-white/75 md:text-2xl",
+  page: [
+    "relative flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden",
+    "px-4 pt-20 pb-6 sm:pt-24 sm:pb-8 md:pt-28",
+  ].join(" "),
+
+  auraWrap: "pointer-events-none absolute inset-0 z-0",
+  aura: "h-full w-full object-cover object-center opacity-90 mix-blend-screen",
+
+  topBlobLayer: "pointer-events-none absolute inset-0 z-[1] overflow-hidden",
+  topBlob: [
+    "absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[48%]",
+    "h-[min(130vw,920px)] w-[min(130vw,920px)] rounded-full bg-[#4999FF]",
+    "blur-[90px] opacity-[0.72] sm:blur-[120px] md:blur-[160px] lg:blur-[190px]",
+  ].join(" "),
+
+  card: [
+    "relative z-10 w-full max-w-[480px] rounded-[24px] border border-white/45",
+    "bg-[#6AA8EE]/45 px-5 py-6 text-white backdrop-blur-md",
+    "sm:max-w-[540px] sm:rounded-[32px] sm:px-6 sm:py-7 md:max-w-[600px] md:px-8 md:py-8",
+  ].join(" "),
+
+  title: "text-center text-3xl font-bold leading-none sm:text-5xl md:text-6xl lg:text-7xl",
+  form: "mt-6 sm:mt-8",
+  row: "mt-4 sm:mt-5",
+
+  field: [
+    "w-full border-b-[2px] border-white/85 bg-transparent pb-2 text-lg leading-none text-white",
+    "outline-none placeholder:text-white/80",
+    "sm:text-xl md:text-2xl lg:text-3xl",
+  ].join(" "),
+
+  forgot: "mt-1 text-right text-sm text-white/85 sm:text-base md:text-xl lg:text-2xl",
+
+  submit: [
+    "mt-6 flex h-[48px] w-full items-center justify-center rounded-full",
+    "bg-[#4C97F6] text-xl font-normal text-white transition hover:opacity-90",
+    "disabled:opacity-50 disabled:cursor-not-allowed",
+    "sm:mt-7 sm:h-[52px] sm:text-2xl md:h-[54px] md:text-3xl lg:h-[58px] lg:text-4xl",
+  ].join(" "),
+
+  error: "mt-3 rounded-lg bg-red-500/20 px-3 py-2 text-center text-sm text-white sm:text-base",
+
+  footer: "mt-4 text-center text-sm text-white/75 sm:mt-5 sm:text-base md:text-xl lg:text-2xl",
   footerLink: "font-medium text-white/90 hover:text-white",
 };
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ mode?: string; url?: string }>;
-}) {
-  const { mode = "login", url = "/" } = await searchParams;
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = searchParams.get("mode") ?? "login";
+  const urlParam = searchParams.get("url") ?? "";
   const isRegister = mode === "register";
-  const safeUrl = url || "/";
-  const switchModeHref = `/login?mode=${isRegister ? "login" : "register"}&url=${encodeURIComponent(safeUrl)}`;
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (urlParam) localStorage.setItem(PENDING_URL_KEY, urlParam);
+  }, [urlParam]);
+
+  const switchHref = `/login?mode=${isRegister ? "login" : "register"}${
+    urlParam ? `&url=${encodeURIComponent(urlParam)}` : ""
+  }`;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      setError("Заполните все поля.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
+      const body: Record<string, string> = { email, password };
+
+      const storedUrl =
+        typeof window !== "undefined" ? localStorage.getItem(PENDING_URL_KEY) : null;
+      const siteUrlFromFlow = (urlParam || storedUrl || "").trim();
+      if (siteUrlFromFlow) {
+        body.siteUrl = siteUrlFromFlow;
+      }
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Ошибка. Попробуйте ещё раз.");
+        return;
+      }
+
+      const finalUrl = data.siteUrl || siteUrlFromFlow;
+      const siteId = data.siteId;
+
+      localStorage.removeItem(PENDING_URL_KEY);
+
+      if (siteId) {
+        if (finalUrl) {
+          try {
+            await analyzeSite(finalUrl);
+          } catch { /* analysis will use mock if fails */ }
+        }
+        router.push(`/dashboard/${siteId}${finalUrl ? `?url=${encodeURIComponent(finalUrl)}` : ""}`);
+        return;
+      }
+
+      if (finalUrl) {
+        try {
+          const result = await analyzeSite(finalUrl);
+          router.push(`/dashboard/${result.siteId}?url=${encodeURIComponent(result.normalizedUrl)}`);
+          return;
+        } catch { /* fall through */ }
+      }
+
+      router.push("/");
+    } catch {
+      setError("Ошибка сети. Проверьте соединение.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className={styles.page}>
@@ -35,26 +153,50 @@ export default async function LoginPage({
         <img src="/aura.svg" alt="" className={styles.aura} />
       </div>
 
+      <div className={styles.topBlobLayer} aria-hidden>
+        <div className={styles.topBlob} />
+      </div>
+
       <section className={styles.card}>
         <h1 className={styles.title}>{isRegister ? "Регистрация" : "Вход"}</h1>
 
-        {/* Это MVP-форма для навигации; реальную авторизацию подключим позже. */}
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.row}>
-            <input className={styles.field} type="email" placeholder="почта" />
+            <input
+              className={styles.field}
+              type="email"
+              placeholder="почта"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
           </div>
           <div className={styles.row}>
-            <input className={styles.field} type="password" placeholder="пароль" />
-            {!isRegister ? <p className={styles.forgot}>забыли пароль?</p> : null}
+            <input
+              className={styles.field}
+              type="password"
+              placeholder="пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isRegister ? "new-password" : "current-password"}
+            />
+            {!isRegister && <p className={styles.forgot}>забыли пароль?</p>}
           </div>
-          <Link href={safeUrl} className={styles.submit}>
-            <span>{isRegister ? "Зарегистрироваться" : "Войти"}</span>
-          </Link>
+
+          {error && <div className={styles.error}>{error}</div>}
+
+          <button type="submit" className={styles.submit} disabled={loading}>
+            {loading
+              ? "Подождите..."
+              : isRegister
+                ? "Зарегистрироваться"
+                : "Войти"}
+          </button>
         </form>
 
         <p className={styles.footer}>
           {isRegister ? "Уже зарегистрированы? " : "Еще не зарегистрированы? "}
-          <Link href={switchModeHref} className={styles.footerLink}>
+          <Link href={switchHref} className={styles.footerLink}>
             {isRegister ? "Войти в аккаунт" : "Создать аккаунт"}
           </Link>
         </p>

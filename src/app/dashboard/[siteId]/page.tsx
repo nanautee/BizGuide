@@ -98,6 +98,7 @@ function buildMockFallback(siteId: string, sessionId: string, url?: string): Das
     scoreDelta: null,
     socialScore: null,
     socialRecommendations: [],
+    socialItems: [],
     startChecklist: [],
     startOffer: [],
     appBlock: null,
@@ -130,6 +131,7 @@ function buildFromCache(
     scoreDelta: siteCache.monitoring.scoreDelta,
     socialScore: socialCache?.score ?? null,
     socialRecommendations: socialCache?.recommendations ?? [],
+    socialItems: socialCache?.items ?? [],
     startChecklist: startCache?.checklist ?? [],
     startOffer: startCache?.commercialOffer ?? [],
     appBlock: appCache

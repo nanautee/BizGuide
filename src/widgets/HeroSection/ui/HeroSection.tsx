@@ -1,108 +1,132 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { GlassInput } from '@/shared/ui/GlassInput';
-import { analyzeSite, startBusiness } from '@/shared/api/api';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { GlassInput } from "@/shared/ui/GlassInput";
+import { analyzeSite } from "@/shared/api/api";
 
-const URL_STORAGE_KEY = 'bizguide-known-urls';
+const URL_STORAGE_KEY = "bizguide-known-urls";
 
 const styles = {
-  // Секция Hero: отдельный слой фона + слой контента.
-  container: "relative w-full min-h-screen overflow-hidden px-4",
-  topBlur:
-    "pointer-events-none absolute left-1/2 top-0 z-[1] h-[500px] w-[900px] -translate-x-1/2 -translate-y-[60%] opacity-90",
-  content:
-    "relative z-10 mx-auto flex min-h-screen w-full max-w-[1280px] flex-col items-center justify-start pt-28 sm:pt-32 md:pt-36 lg:pt-90",
-  title:
-    "mx-auto max-w-[980px] px-2 text-center text-[46px] font-bold leading-[0.92] text-white sm:text-[58px] md:text-[72px] lg:text-[80px]",
-  inputWrapper: "mt-8 flex w-full justify-center px-6 md:mt-10",
-  inputGroup: "relative w-full max-w-[760px]",
-  button:
-    "absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center transition-transform active:scale-95 disabled:opacity-50 md:right-3 md:h-12 md:w-12",
-  buttonImg: "h-11 w-11 md:h-12 md:w-12",
-  startButtonWrap: "relative mt-4 flex w-full flex-col items-center md:mt-5",
-  startButton:
-    "relative z-10 rounded-full border border-white/20 bg-[#4C97F6] px-8 py-2 text-base font-normal leading-none text-[#FFFFFF] transition hover:opacity-95 active:scale-95 md:px-10 md:text-xl",
-  // Большой фоновый слой песочных часов: на всю ширину и почти на высоту экрана.
-  auraWrap:
-    "pointer-events-none absolute left-1/2 top-[60%] z-0 h-[112vh] w-[1900px] -translate-x-1/2 -translate-y-1/2 sm:w-[2100px] md:top-[58%] md:w-[2300px] lg:w-[2500px]",
-  aura: "h-full w-full object-contain object-center opacity-95 mix-blend-screen",
-  error: "mt-3 text-red-100 text-sm text-center",
-  // Попап для нового URL (вход/регистрация перед первым анализом).
-  firstVisitOverlay: "fixed inset-0 z-50 bg-black/35 backdrop-blur-[2px] flex items-center justify-center px-4",
-  firstVisitCard:
-    "relative w-full max-w-4xl rounded-[32px] border border-white/40 bg-gradient-to-r from-[#8AB7E7] to-[#6AA8F2] p-6 md:p-10 text-white shadow-2xl overflow-hidden",
-  firstVisitClose:
-    "absolute right-4 top-4 text-white/70 hover:text-white text-4xl leading-none transition cursor-pointer",
-  firstVisitTitle: "text-4xl md:text-6xl font-bold",
-  firstVisitText: "mt-12 text-4xl md:text-5xl font-bold leading-tight max-w-xl",
-  firstVisitActions: "mt-8 flex flex-wrap gap-3",
-  firstVisitButton:
-    "rounded-full border border-white/30 bg-white/20 px-8 py-3 text-2xl font-normal md:text-3xl hover:bg-white/30 transition",
-  // Маскот в попапе авторизации.
-  mascot: "pointer-events-none absolute right-4 md:right-8 bottom-0 w-[220px] md:w-[320px] opacity-95",
-  // Стили попапа для сценария "бизнес только запускается".
-  modalOverlay: "fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px] flex items-center justify-center px-4",
-  modal: "w-full max-w-2xl rounded-3xl border border-white/30 bg-[#89BAF0] p-6 md:p-8 text-white shadow-2xl",
-  modalTitle: "text-2xl md:text-3xl font-bold",
-  modalSubtitle: "mt-2 text-white/90",
-  formRow: "mt-5 flex flex-col md:flex-row gap-3",
-  select:"h-11 rounded-xl border border-white/40 bg-white/15 px-4 outline-none focus:border-white/70",
-  modalActions: "mt-5 flex gap-3",
-  modalButtonPrimary:"rounded-xl bg-[#4C97F6] px-5 py-2 font-normal hover:opacity-90 disabled:opacity-50",
-  modalButtonGhost: "rounded-xl border border-white/40 px-5 py-2 hover:bg-white/10",
-  resultBox: "mt-5 rounded-2xl bg-white/10 p-4 border border-white/30",
-  resultTitle: "font-semibold text-lg",
-  list: "mt-2 space-y-1 text-sm md:text-base",
+  container: [
+    "z-96 relative w-full overflow-hidden",
+    "min-h-[60vh] sm:min-h-[75vh] md:min-h-screen",
+  ].join(" "),
+
+  topBlur: [
+    "pointer-events-none absolute left-1/2 top-0 z-[1]",
+    "h-[300px] w-[600px] -translate-x-1/2 -translate-y-[60%] opacity-90",
+    "sm:h-[400px] sm:w-[750px] md:h-[500px] md:w-[900px]",
+    "lg:h-[600px] lg:w-[1100px] xl:h-[700px] xl:w-[1400px]",
+  ].join(" "),
+
+  auraWrap: [
+    "pointer-events-none absolute inset-0 z-0",
+    "flex items-center justify-center",
+  ].join(" "),
+  aura: [
+    "object-contain object-center opacity-90 mix-blend-screen",
+    "h-[120%] w-[120%]",
+    "sm:h-[130%] sm:w-[130%]",
+    "lg:h-[140%] lg:w-[140%]",
+    "xl:h-[160%] xl:w-[160%]",
+  ].join(" "),
+
+  content: [
+    "relative z-10 mx-auto flex w-full",
+    "flex-col items-center justify-start px-4",
+    "min-h-[60vh] pt-20",
+    "sm:min-h-[75vh] sm:px-6 sm:pt-28",
+    "md:min-h-screen md:px-10 md:pt-36",
+    "lg:px-14 lg:pt-40",
+  ].join(" "),
+
+  title: [
+    "mx-auto text-center font-bold leading-[0.92] text-white",
+    "text-[32px] sm:text-[46px] md:text-[64px] lg:text-[80px] xl:text-[96px] 2xl:text-[112px]",
+  ].join(" "),
+
+  inputWrapper: "mt-6 flex w-full justify-center sm:mt-8 md:mt-10 lg:mt-12",
+  inputGroup: "relative w-full max-w-[760px] xl:max-w-[900px]",
+
+  submitBtn: [
+    "absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-center",
+    "h-10 w-10 transition-transform active:scale-95 disabled:opacity-50",
+    "sm:h-11 sm:w-11 md:right-3 md:h-12 md:w-12",
+  ].join(" "),
+  submitIcon: "h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12",
+
+  ctaWrap: "relative mt-4 flex w-full flex-col items-center md:mt-5 lg:mt-6",
+  ctaBtn: [
+    "relative z-10 rounded-full border border-white/20 bg-[#4C97F6]",
+    "px-6 py-2 text-sm font-normal leading-none text-white",
+    "transition hover:opacity-95 active:scale-95",
+    "sm:px-8 sm:text-base md:px-10 md:text-xl lg:text-2xl lg:px-12 lg:py-3",
+  ].join(" "),
+
+  error: "mt-3 text-center text-sm text-red-100",
+
+  overlay: "fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 backdrop-blur-[2px]",
+
+  authCard: [
+    "relative min-w-[1200px] min-h-[600px] max-w-[800px] overflow-hidden rounded-[24px] border border-white/40",
+    "bg-gradient-to-r from-[#8AB7E7] to-[#6AA8F2] p-5 text-white shadow-2xl",
+    "sm:max-w-2xl sm:rounded-[32px] sm:p-6 md:max-w-4xl md:p-10",
+  ].join(" "),
+  authClose: [
+    "absolute right-3 top-3 flex h-10 w-15 cursor-pointer items-center justify-center",
+    "rounded-full border border-white/40 bg-white/15 text-2xl leading-none text-white shadow-md",
+    "backdrop-blur-md transition hover:bg-white/25 hover:text-white active:scale-95",
+    "sm:right-4 sm:top-4 sm:h-12 sm:w-12 sm:text-4xl md:h-14 md:w-14 md:text-6xl",
+  ].join(" "),
+  authTitle: "z-80 relative text-6xl font-bold sm:text-6xl md:text-7xl",
+  authText: [
+    "z-80 relative pt-45",
+    " mt-6 max-w-xl text-xl font-bold leading-tight",
+    "sm:mt-8 sm:text-3xl md:mt-12 md:text-5xl",
+  ].join(" "),
+  authActions: "mt-5 flex flex-wrap gap-3 sm:mt-6 md:mt-8",
+  authBtn: [
+    "z-51 rounded-[45px] border border-white/30 bg-white/20 px-6 py-3",
+    "text-lg font-normal transition hover:bg-white/30",
+    "sm:h-[70px] sm:px-8 sm:text-2xl md:px-12 md:text-3xl lg:text-4xl",
+  ].join(" "),
+  mascot: [
+    "z-50 pointer-events-none absolute bottom-0 right-2 w-[140px] opacity-95",
+    "sm:right-4 sm:w-[320px] md:right-[-20px] md:w-[840px]",
+  ].join(" "),
+
 };
 
 export const HeroSection = () => {
-  // Основной URL для сценария "анализ сайта".
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  // Модалка для сценария "у меня нет сайта".
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Модалка авторизации при первом URL.
+  const [error, setError] = useState("");
   const [isFirstVisitModalOpen, setIsFirstVisitModalOpen] = useState(false);
-  const [pendingUrl, setPendingUrl] = useState('');
-
-  // Состояние "старта бизнеса".
-  const [niche, setNiche] = useState('ecommerce');
-  const [startLoading, setStartLoading] = useState(false);
-  const [startResult, setStartResult] = useState<{
-    niche: string;
-    checklist: string[];
-    commercialOffer: string[];
-  } | null>(null);
+  const [pendingUrl, setPendingUrl] = useState("");
   const router = useRouter();
 
-  // Нормализуем URL для проверки "видели ранее / новый адрес".
-  const normalizeForStorage = (value: string) => value.trim().toLowerCase();
+  const normalizeForStorage = (v: string) => v.trim().toLowerCase();
 
   const getKnownUrls = (): Set<string> => {
-    if (typeof window === 'undefined') return new Set<string>();
+    if (typeof window === "undefined") return new Set();
     const raw = window.localStorage.getItem(URL_STORAGE_KEY);
-    if (!raw) return new Set<string>();
+    if (!raw) return new Set();
     try {
-      return new Set<string>(JSON.parse(raw) as string[]);
+      return new Set(JSON.parse(raw) as string[]);
     } catch {
-      return new Set<string>();
+      return new Set();
     }
   };
 
   const rememberUrl = (value: string) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const known = getKnownUrls();
     known.add(normalizeForStorage(value));
-    window.localStorage.setItem(URL_STORAGE_KEY, JSON.stringify(Array.from(known)));
+    window.localStorage.setItem(URL_STORAGE_KEY, JSON.stringify([...known]));
   };
 
   const runAnalyzeAndRedirect = async (targetUrl: string) => {
-    // Запускаем API-анализ и переходим в личный кабинет конкретного сайта.
     const data = await analyzeSite(targetUrl.trim());
     rememberUrl(targetUrl);
     router.push(`/dashboard/${data.siteId}?url=${encodeURIComponent(data.normalizedUrl)}`);
@@ -110,12 +134,9 @@ export const HeroSection = () => {
 
   const handleAnalyze = async () => {
     if (!url.trim()) return;
-    setError('');
-    const normalizedForStorage = normalizeForStorage(url);
-    const known = getKnownUrls();
+    setError("");
 
-    // Первый ввод URL -> просим авторизоваться.
-    if (!known.has(normalizedForStorage)) {
+    if (!getKnownUrls().has(normalizeForStorage(url))) {
       rememberUrl(url);
       setPendingUrl(url.trim());
       setIsFirstVisitModalOpen(true);
@@ -126,20 +147,9 @@ export const HeroSection = () => {
     try {
       await runAnalyzeAndRedirect(url);
     } catch {
-      setError('Не удалось проанализировать сайт. Проверьте ссылку и попробуйте снова.');
+      setError("Не удалось проанализировать сайт. Проверьте ссылку и попробуйте снова.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleStartBusiness = async () => {
-    // Запрашиваем персональный старт-план по выбранной нише.
-    setStartLoading(true);
-    try {
-      const data = await startBusiness(niche);
-      setStartResult(data);
-    } finally {
-      setStartLoading(false);
     }
   };
 
@@ -147,17 +157,16 @@ export const HeroSection = () => {
     <div className={styles.container}>
       <img src="/blurelips.svg" alt="" aria-hidden className={styles.topBlur} />
 
-      {/* Декоративный фон Hero (ниже основного контента) */}
       <div className={styles.auraWrap} aria-hidden>
         <img src="/aura.svg" alt="" className={styles.aura} />
       </div>
 
-      {/* Контент Hero: заголовок, URL-форма, CTA */}
       <div className={styles.content}>
         <h1 className={styles.title}>
           <span className="block">Анализ вашего бизнеса</span>
           <span className="block">в интернете</span>
         </h1>
+
         <div id="audit" className={styles.inputWrapper}>
           <div className={styles.inputGroup}>
             <GlassInput
@@ -165,47 +174,43 @@ export const HeroSection = () => {
               placeholder="ссылка на сайт"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+              onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
               disabled={loading}
             />
-            <button
-              className={styles.button}
-              onClick={handleAnalyze}
-              disabled={loading}
-            >
-              <img src="/arrow.svg" alt="Анализировать" className={styles.buttonImg} />
+            <button className={styles.submitBtn} onClick={handleAnalyze} disabled={loading}>
+              <img src="/arrow.svg" alt="Анализировать" className={styles.submitIcon} />
             </button>
           </div>
         </div>
-        <div className={styles.startButtonWrap}>
-          <button className={styles.startButton} onClick={() => setIsModalOpen(true)}>
+
+        <div className={styles.ctaWrap}>
+          <a href="/first-step" className={styles.ctaBtn}>
             у меня нет сайта
-          </button>
+          </a>
         </div>
-        {error ? <p className={styles.error}>{error}</p> : null}
+
+        {error && <p className={styles.error}>{error}</p>}
       </div>
 
-      {/* Модалка авторизации для первого URL */}
-      {isFirstVisitModalOpen ? (
-        <div className={styles.firstVisitOverlay}>
-          <div className={styles.firstVisitCard}>
+      {isFirstVisitModalOpen && (
+        <div className={styles.overlay}>
+          <div className={styles.authCard}>
             <button
-              className={styles.firstVisitClose}
+              className={styles.authClose}
               onClick={() => setIsFirstVisitModalOpen(false)}
               aria-label="Закрыть"
             >
               ×
             </button>
-            <h2 className={styles.firstVisitTitle}>Первый раз на сайте?</h2>
-            <p className={styles.firstVisitText}>
+            <h2 className={styles.authTitle}>Первый раз на сайте?</h2>
+            <p className={styles.authText}>
               Чтобы начать анализ
               <br />
               нужно войти в аккаунт
             </p>
-
-            <div className={styles.firstVisitActions}>
+            <div className={styles.authActions}>
               <button
-                className={styles.firstVisitButton}
+                className={styles.authBtn}
                 onClick={() =>
                   router.push(`/login?mode=register&url=${encodeURIComponent(pendingUrl || url)}`)
                 }
@@ -213,70 +218,18 @@ export const HeroSection = () => {
                 Зарегистрироваться
               </button>
               <button
-                className={styles.firstVisitButton}
-                onClick={() => router.push(`/login?mode=login&url=${encodeURIComponent(pendingUrl || url)}`)}
+                className={styles.authBtn}
+                onClick={() =>
+                  router.push(`/login?mode=login&url=${encodeURIComponent(pendingUrl || url)}`)
+                }
               >
                 Войти
               </button>
             </div>
-
             <img src="/elipsboy.svg" alt="" aria-hidden className={styles.mascot} />
           </div>
         </div>
-      ) : null}
-
-      {/* Модалка "помощь со стартом бизнеса" */}
-      {isModalOpen ? (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h2 className={styles.modalTitle}>Поможем запустить бизнес с нуля</h2>
-            <p className={styles.modalSubtitle}>
-              Выберите нишу — мы сразу предложим план первых действий.
-            </p>
-
-            <div className={styles.formRow}>
-              <select
-                className={styles.select}
-                value={niche}
-                onChange={(event) => setNiche(event.target.value)}
-              >
-                <option value="ecommerce">Интернет-магазин</option>
-                <option value="services">Услуги</option>
-                <option value="education">Образование</option>
-              </select>
-            </div>
-
-            <div className={styles.modalActions}>
-              <button
-                className={styles.modalButtonPrimary}
-                onClick={handleStartBusiness}
-                disabled={startLoading}
-              >
-                {startLoading ? 'Готовим рекомендации...' : 'Показать план'}
-              </button>
-              <button className={styles.modalButtonGhost} onClick={() => setIsModalOpen(false)}>
-                Закрыть
-              </button>
-            </div>
-
-            {startResult ? (
-              <div className={styles.resultBox}>
-                <h3 className={styles.resultTitle}>{startResult.niche}</h3>
-                <ul className={styles.list}>
-                  {startResult.checklist.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
-                <ul className={styles.list}>
-                  {startResult.commercialOffer.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
+      )}
     </div>
   );
 };

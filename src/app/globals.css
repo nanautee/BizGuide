@@ -23,7 +23,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Helvetica;
 }
 
 body {
@@ -40,11 +40,11 @@ button,
 input,
 textarea,
 select {
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: Helvetica !important;
 }
 
 *,
 *::before,
 *::after {
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: Helvetica !important;
 }
